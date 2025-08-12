@@ -5,6 +5,16 @@ const fetchTracks = async (identifier) => {
     const res = await fetch(`https://archive.org/metadata/${identifier}`);
     const data = await res.json();
     const tracks = (data?.files ?? []).filter((f) => ["Opus"].includes(f.format));
+
+    // Sắp xếp tracks theo số ở đầu tên file
+    tracks.sort((a, b) => {
+        // Lấy số đầu tiên ở tên file a
+        const numA = parseInt(a.name.match(/^(\d+)/)?.[1] ?? "0", 10);
+        // Lấy số đầu tiên ở tên file b
+        const numB = parseInt(b.name.match(/^(\d+)/)?.[1] ?? "0", 10);
+        return numA - numB;
+    });
+
     return tracks.map((t, index) => ({
         id: index.toString(),
         title: t.name.replace(/\.[^/.]+$/, "").normalize("NFKC"),
