@@ -130,8 +130,8 @@ function App() {
 
             navigator.mediaSession.setActionHandler("previoustrack", onPrev);
             navigator.mediaSession.setActionHandler("nexttrack", onNext);
-            navigator.mediaSession.setActionHandler("play", () => onTogglePlay());
-            navigator.mediaSession.setActionHandler("pause", () => onTogglePlay());
+            navigator.mediaSession.setActionHandler("play", () => onPlay());
+            navigator.mediaSession.setActionHandler("pause", () => onPause());
         }
     }, [trackCurrentIndex, tracks]);
 
@@ -159,6 +159,18 @@ function App() {
         else activeAudio.current.play();
 
         setIsPlay(!isPlay);
+    };
+
+    const onPlay = () => {
+        const [activeAudio, _] = getAudios();
+        activeAudio.current.play();
+        setIsPlay(true);
+    };
+
+    const onPause = () => {
+        const [activeAudio, _] = getAudios();
+        activeAudio.current.pause();
+        setIsPlay(false);
     };
 
     const onNext = () => {
