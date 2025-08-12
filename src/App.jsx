@@ -42,7 +42,7 @@ function getNextIndex(currentIndex, tracksLength, step) {
 }
 
 function App() {
-    const [identifier, setIdentifier] = useState("tacgiasuthatman");
+    const [identifier, setIdentifier] = useState("");
     const [tracks, setTracks] = useState([]);
     const [trackCurrentIndex, setTrackCurrentIndex] = useState(0);
     const [isTracksLoading, setIsTracksLoading] = useState(true);
@@ -76,7 +76,7 @@ function App() {
 
     useEffect(() => {
         const loadData = async () => {
-            const identifier = localStorage.getItem("identifier") ?? "";
+            const identifier = localStorage.getItem("identifier") ?? "tacgiasuthatman";
             const tracks = JSON.parse(localStorage.getItem("tracks") ?? "[]");
             const trackCurrentIndex = JSON.parse(localStorage.getItem("trackCurrentIndex") ?? "0");
 
@@ -88,6 +88,10 @@ function App() {
 
         loadData();
     }, []);
+
+    useEffect(() => {
+        if (identifier && tracks.length === 0) onLoadIdentifier();
+    }, [identifier]);
 
     useEffect(() => {
         if (tracks.length === 0) return;
