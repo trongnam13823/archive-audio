@@ -56,7 +56,7 @@ function App() {
     const [identifier, setIdentifier] = useState("");
     const [tracks, setTracks] = useState([]);
     const [trackCurrentIndex, setTrackCurrentIndex] = useState(0);
-    const [isTracksLoading, setIsTracksLoading] = useState(true);
+    const [isTracksLoading, setIsTracksLoading] = useState(false);
     const [isPlay, setIsPlay] = useState(false);
     const audioRefA = useRef(null);
     const audioRefB = useRef(null);
@@ -87,14 +87,13 @@ function App() {
 
     useEffect(() => {
         const loadData = async () => {
-            const identifier = "tacgiasuthatman";
-            const tracks = [];
-            const trackCurrentIndex = 0;
+            const identifier = localStorage.getItem("identifier") ?? "tacgiasuthatman";
+            const tracks = JSON.parse(localStorage.getItem("tracks") ?? "[]");
+            const trackCurrentIndex = JSON.parse(localStorage.getItem("trackCurrentIndex") ?? "0");
 
             setIdentifier(identifier);
             setTracks(tracks);
             setTrackCurrentIndex(trackCurrentIndex);
-            setIsTracksLoading(false);
         };
 
         loadData();
@@ -143,6 +142,10 @@ function App() {
         setIsTracksLoading(true);
         const tracks = await fetchTracks(text);
 
+        localStorage.setItem("identifier", text);
+        localStorage.setItem("tracks", JSON.stringify(tracks));
+        localStorage.setItem("trackCurrentIndex", 0);
+
         setTracks(tracks);
         setIdentifier(text);
         setIsTracksLoading(false);
@@ -178,6 +181,7 @@ function App() {
         setActiveAudioId(nextAudio.id);
 
         updateMediaMetadata(tracks[index], identifier);
+        localStorage.setItem("trackCurrentIndex", index);
     };
 
     const onPrev = () => {
@@ -188,6 +192,7 @@ function App() {
         setActiveAudioId(prevAudio.id);
 
         updateMediaMetadata(tracks[index], identifier);
+        localStorage.setItem("trackCurrentIndex", index);
     };
 
     const onTrack = (index) => {
@@ -197,6 +202,8 @@ function App() {
 
         setTrackCurrentIndex(index);
         setActiveAudioId(activeAudio.id);
+
+        localStorage.setItem("trackCurrentIndex", index);
     };
 
     const onShuffle = () => {
@@ -208,6 +215,9 @@ function App() {
         setTracks(shuffledTracksa);
         setTrackCurrentIndex(0);
         setActiveAudioId(activeAudio.id);
+
+        localStorage.setItem("tracks", JSON.stringify(shuffledTracksa));
+        localStorage.setItem("trackCurrentIndex", 0);
     };
 
     return (
