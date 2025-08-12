@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Pause, Play, RotateCw, Shuffle, SkipBack, SkipForward } from "lucide-react";
+import { LoaderCircle, Pause, Play, RotateCw, Shuffle, SkipBack, SkipForward } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const fetchTracks = async (identifier) => {
@@ -57,6 +57,7 @@ function App() {
     const [tracks, setTracks] = useState([]);
     const [trackCurrentIndex, setTrackCurrentIndex] = useState(0);
     const [isTracksLoading, setIsTracksLoading] = useState(false);
+    const [isActiveAudioLoading, setActiveAudioLoading] = useState(false);
     const [isPlay, setIsPlay] = useState(false);
     const audioRefA = useRef(null);
     const audioRefB = useRef(null);
@@ -114,6 +115,10 @@ function App() {
 
             if (!activeAudio.current.src) {
                 activeAudio.current.src = tracks[trackCurrentIndex].url;
+            }
+
+            if (activeAudio.current.readyState < 3) {
+                setActiveAudioLoading(true);
             }
 
             if (isPlay) activeAudio.current.play();
@@ -220,6 +225,13 @@ function App() {
         localStorage.setItem("trackCurrentIndex", 0);
     };
 
+    const onCanPlayAudio = (e) => {
+        console.log(e.target.id, e.target.id === activeAudioId);
+        if (e.target.id === activeAudioId) {
+            setActiveAudioLoading(false);
+        }
+    };
+
     return (
         <main className="max-w-4xl mx-auto h-svh w-svw flex flex-col bg-black text-gray-100">
             {/* Header với identifier */}
@@ -244,30 +256,36 @@ function App() {
                         </h1>
 
                         <audio
+                            id="A"
                             ref={audioRefA}
                             controls
                             playsInline
                             preload="auto"
                             className={`w-full mb-6 ${activeAudioId === "A" ? "block" : "hidden"}`}
                             onEnded={onNext}
+                            onCanPlay={onCanPlayAudio}
                         />
 
                         <audio
+                            id="B"
                             ref={audioRefB}
                             controls
                             playsInline
                             preload="auto"
                             className={`w-full mb-6 ${activeAudioId === "B" ? "block" : "hidden"}`}
                             onEnded={onNext}
+                            onCanPlay={onCanPlayAudio}
                         />
 
                         <audio
+                            id="C"
                             ref={audioRefC}
                             controls
                             playsInline
                             preload="auto"
                             className={`w-full mb-6 ${activeAudioId === "C" ? "block" : "hidden"}`}
                             onEnded={onNext}
+                            onCanPlay={onCanPlayAudio}
                         />
 
                         <div className="flex items-center justify-evenly gap-4 mb-4">
@@ -287,7 +305,13 @@ function App() {
                                 className="p-3 bg-white cursor-pointer text-black rounded-full hover:bg-gray-200 transition-colors"
                                 onClick={onTogglePlay}
                             >
-                                {isPlay ? <Pause size={24} /> : <Play size={24} />}
+                                {isActiveAudioLoading ? (
+                                    <LoaderCircle className="animate-spin" />
+                                ) : isPlay ? (
+                                    <Pause size={24} />
+                                ) : (
+                                    <Play size={24} />
+                                )}
                             </button>
                             <button
                                 className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
@@ -318,8 +342,8 @@ function App() {
                                     onClick={() => onTrack(index)}
                                     className={`px-6 py-3 cursor-pointer transition-colors ${
                                         index === trackCurrentIndex
-                                            ? "bg-gray-900 text-white"
-                                            : "text-gray-300 hover:text-white hover:bg-gray-900/50"
+                                            ? "text-black bg-gray-200"
+                                            : "text-gray-200 hover:text-white hover:bg-gray-200/20"
                                     }`}
                                 >
                                     <div className="truncate">{t.title}</div>
@@ -333,7 +357,7 @@ function App() {
                     <div className="text-center text-gray-400">
                         {isTracksLoading ? (
                             <div className="flex items-center gap-3">
-                                <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                <LoaderCircle className="animate-spin" />
                                 Loading...
                             </div>
                         ) : (
