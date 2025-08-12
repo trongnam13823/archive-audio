@@ -221,130 +221,128 @@ function App() {
     };
 
     return (
-        <div className="min-h-screen bg-black text-gray-100">
-            <main className="max-w-4xl mx-auto h-screen flex flex-col">
-                {/* Header với identifier */}
-                <div className="p-4 border-b border-gray-800">
-                    <p
-                        contentEditable
-                        suppressContentEditableWarning={true}
-                        spellCheck={false}
-                        onBlur={onLoadIdentifier}
-                        className="focus:outline-0 text-center text-lg font-medium text-gray-300 focus:text-white transition-colors duration-200"
-                    >
-                        {identifier || "Enter Identifier"}
-                    </p>
-                </div>
+        <main className="max-w-4xl mx-auto h-svh w-svw flex flex-col bg-black text-gray-100">
+            {/* Header với identifier */}
+            <div className="p-4 border-b border-gray-800">
+                <p
+                    contentEditable
+                    suppressContentEditableWarning={true}
+                    spellCheck={false}
+                    onBlur={onLoadIdentifier}
+                    className="focus:outline-0 text-center text-lg font-medium text-gray-300 focus:text-white transition-colors duration-200"
+                >
+                    {identifier || "Enter Identifier"}
+                </p>
+            </div>
 
-                {tracks.length > 0 && !isTracksLoading ? (
-                    <>
-                        {/* Player controls */}
-                        <div className="p-6 border-b border-gray-800">
-                            <h1 className="text-2xl text-center font-bold text-white mb-6 truncate">
-                                {tracks[trackCurrentIndex]?.title}
-                            </h1>
+            {tracks.length > 0 && !isTracksLoading ? (
+                <>
+                    {/* Player controls */}
+                    <div className="p-6 border-b border-gray-800">
+                        <h1 className="text-2xl text-center font-bold text-white mb-6 truncate">
+                            {tracks[trackCurrentIndex]?.title}
+                        </h1>
 
-                            <audio
-                                ref={audioRefA}
-                                controls
-                                playsInline
-                                preload="auto"
-                                className={`w-full mb-6 ${activeAudioId === "A" ? "block" : "hidden"}`}
-                                onEnded={onNext}
-                            />
+                        <audio
+                            ref={audioRefA}
+                            controls
+                            playsInline
+                            preload="auto"
+                            className={`w-full mb-6 ${activeAudioId === "A" ? "block" : "hidden"}`}
+                            onEnded={onNext}
+                        />
 
-                            <audio
-                                ref={audioRefB}
-                                controls
-                                playsInline
-                                preload="auto"
-                                className={`w-full mb-6 ${activeAudioId === "B" ? "block" : "hidden"}`}
-                                onEnded={onNext}
-                            />
+                        <audio
+                            ref={audioRefB}
+                            controls
+                            playsInline
+                            preload="auto"
+                            className={`w-full mb-6 ${activeAudioId === "B" ? "block" : "hidden"}`}
+                            onEnded={onNext}
+                        />
 
-                            <audio
-                                ref={audioRefC}
-                                controls
-                                playsInline
-                                preload="auto"
-                                className={`w-full mb-6 ${activeAudioId === "C" ? "block" : "hidden"}`}
-                                onEnded={onNext}
-                            />
+                        <audio
+                            ref={audioRefC}
+                            controls
+                            playsInline
+                            preload="auto"
+                            className={`w-full mb-6 ${activeAudioId === "C" ? "block" : "hidden"}`}
+                            onEnded={onNext}
+                        />
 
-                            <div className="flex items-center justify-evenly gap-4 mb-4">
-                                <button
-                                    className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
-                                    onClick={onLoadIdentifier}
-                                >
-                                    <RotateCw size={20} />
-                                </button>
-                                <button
-                                    className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
-                                    onClick={onPrev}
-                                >
-                                    <SkipBack size={20} />
-                                </button>
-                                <button
-                                    className="p-3 bg-white cursor-pointer text-black rounded-full hover:bg-gray-200 transition-colors"
-                                    onClick={onTogglePlay}
-                                >
-                                    {isPlay ? <Pause size={24} /> : <Play size={24} />}
-                                </button>
-                                <button
-                                    className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
-                                    onClick={onNext}
-                                >
-                                    <SkipForward size={20} />
-                                </button>
-                                <button
-                                    className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
-                                    onClick={onShuffle}
-                                >
-                                    <Shuffle size={20} />
-                                </button>
-                            </div>
-
-                            <div className="text-center text-sm text-gray-400">
-                                {trackCurrentIndex + 1} / {tracks.length} tracks
-                            </div>
+                        <div className="flex items-center justify-evenly gap-4 mb-4">
+                            <button
+                                className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
+                                onClick={onLoadIdentifier}
+                            >
+                                <RotateCw size={20} />
+                            </button>
+                            <button
+                                className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
+                                onClick={onPrev}
+                            >
+                                <SkipBack size={20} />
+                            </button>
+                            <button
+                                className="p-3 bg-white cursor-pointer text-black rounded-full hover:bg-gray-200 transition-colors"
+                                onClick={onTogglePlay}
+                            >
+                                {isPlay ? <Pause size={24} /> : <Play size={24} />}
+                            </button>
+                            <button
+                                className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
+                                onClick={onNext}
+                            >
+                                <SkipForward size={20} />
+                            </button>
+                            <button
+                                className="p-2 text-gray-400 cursor-pointer hover:text-white transition-colors"
+                                onClick={onShuffle}
+                            >
+                                <Shuffle size={20} />
+                            </button>
                         </div>
 
-                        {/* Track list */}
-                        <div className="flex-1 overflow-hidden">
-                            <div className="h-full overflow-y-auto">
-                                {tracks.map((t, index) => (
-                                    <div
-                                        id={`track-${index}`}
-                                        key={t.id}
-                                        onClick={() => onTrack(index)}
-                                        className={`px-6 py-3 cursor-pointer transition-colors ${
-                                            index === trackCurrentIndex
-                                                ? "bg-gray-900 text-white"
-                                                : "text-gray-300 hover:text-white hover:bg-gray-900/50"
-                                        }`}
-                                    >
-                                        <div className="truncate">{t.title}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </>
-                ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                        <div className="text-center text-gray-400">
-                            {isTracksLoading ? (
-                                <div className="flex items-center gap-3">
-                                    <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
-                                    Loading...
-                                </div>
-                            ) : (
-                                "Track list is empty."
-                            )}
+                        <div className="text-center text-sm text-gray-400">
+                            {trackCurrentIndex + 1} / {tracks.length} tracks
                         </div>
                     </div>
-                )}
-            </main>
-        </div>
+
+                    {/* Track list */}
+                    <div className="flex-1 overflow-hidden">
+                        <div className="h-full overflow-y-auto">
+                            {tracks.map((t, index) => (
+                                <div
+                                    id={`track-${index}`}
+                                    key={t.id}
+                                    onClick={() => onTrack(index)}
+                                    className={`px-6 py-3 cursor-pointer transition-colors ${
+                                        index === trackCurrentIndex
+                                            ? "bg-gray-900 text-white"
+                                            : "text-gray-300 hover:text-white hover:bg-gray-900/50"
+                                    }`}
+                                >
+                                    <div className="truncate">{t.title}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </>
+            ) : (
+                <div className="flex-1 flex items-center justify-center">
+                    <div className="text-center text-gray-400">
+                        {isTracksLoading ? (
+                            <div className="flex items-center gap-3">
+                                <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></div>
+                                Loading...
+                            </div>
+                        ) : (
+                            "Track list is empty."
+                        )}
+                    </div>
+                </div>
+            )}
+        </main>
     );
 }
 
