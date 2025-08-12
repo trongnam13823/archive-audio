@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { LoaderCircle, Pause, Play, RotateCw, Shuffle, SkipBack, SkipForward } from "lucide-react";
+import { LoaderCircle, Music, Pause, Play, RotateCw, Shuffle, SkipBack, SkipForward } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const fetchTracks = async (identifier) => {
@@ -52,7 +52,7 @@ function getNextIndex(currentIndex, tracksLength, step) {
     return (currentIndex + step + tracksLength) % tracksLength;
 }
 
-function App() {
+export default function App() {
     const [identifier, setIdentifier] = useState("");
     const [tracks, setTracks] = useState([]);
     const [trackCurrentIndex, setTrackCurrentIndex] = useState(0);
@@ -65,39 +65,35 @@ function App() {
     const [activeAudioId, setActiveAudioId] = useState("A");
 
     const getAudios = () => {
-        if (activeAudioId === "A")
-            return [
-                { current: audioRefA.current, id: "A" }, // curr
-                { current: audioRefB.current, id: "B" }, // next
-                { current: audioRefC.current, id: "C" }, // prev
-            ];
-        else if (activeAudioId === "B")
-            return [
-                { current: audioRefB.current, id: "B" },
-                { current: audioRefC.current, id: "C" },
-                { current: audioRefA.current, id: "A" },
-            ];
-        else if (activeAudioId === "C") {
-            return [
-                { current: audioRefC.current, id: "C" },
-                { current: audioRefA.current, id: "A" },
-                { current: audioRefB.current, id: "B" },
-            ];
-        }
+        const audioRefs = {
+            A: audioRefA.current,
+            B: audioRefB.current,
+            C: audioRefC.current,
+        };
+
+        const orderMap = {
+            A: ["A", "B", "C"],
+            B: ["B", "C", "A"],
+            C: ["C", "A", "B"],
+        };
+
+        const order = orderMap[activeAudioId];
+
+        return {
+            active: audioRefs[order[0]],
+            next: audioRefs[order[1]],
+            prev: audioRefs[order[2]],
+        };
     };
 
     useEffect(() => {
-        const loadData = async () => {
-            const identifier = localStorage.getItem("identifier") ?? "tacgiasuthatman";
-            const tracks = JSON.parse(localStorage.getItem("tracks") ?? "[]");
-            const trackCurrentIndex = JSON.parse(localStorage.getItem("trackCurrentIndex") ?? "0");
+        const identifier = localStorage.getItem("identifier") ?? "tacgiasuthatman";
+        const tracks = JSON.parse(localStorage.getItem("tracks") ?? "[]");
+        const trackCurrentIndex = JSON.parse(localStorage.getItem("trackCurrentIndex") ?? "0");
 
-            setIdentifier(identifier);
-            setTracks(tracks);
-            setTrackCurrentIndex(trackCurrentIndex);
-        };
-
-        loadData();
+        setIdentifier(identifier);
+        setTracks(tracks);
+        setTrackCurrentIndex(trackCurrentIndex);
     }, []);
 
     useEffect(() => {
@@ -111,23 +107,23 @@ function App() {
         currentItem.scrollIntoView({ block: "center" });
 
         if (tracks.length > 0) {
-            const [activeAudio, nextAudio, prevAudio] = getAudios();
+            const { active, next, prev } = getAudios();
 
-            if (!activeAudio.current.src) {
-                activeAudio.current.src = tracks[trackCurrentIndex].url;
+            if (!active.src) {
+                active.src = tracks[trackCurrentIndex].url;
             }
 
-            if (activeAudio.current.readyState < 3) {
+            if (active.readyState < 3) {
                 setActiveAudioLoading(true);
             }
 
-            if (isPlay) activeAudio.current.play();
+            if (isPlay) active.play();
 
-            nextAudio.current.pause();
-            prevAudio.current.pause();
+            next.pause();
+            prev.pause();
 
-            nextAudio.current.src = tracks[getNextIndex(trackCurrentIndex, tracks.length, +1)].url;
-            prevAudio.current.src = tracks[getNextIndex(trackCurrentIndex, tracks.length, -1)].url;
+            next.src = tracks[getNextIndex(trackCurrentIndex, tracks.length, +1)].url;
+            prev.src = tracks[getNextIndex(trackCurrentIndex, tracks.length, -1)].url;
         }
 
         if ("mediaSession" in navigator) {
@@ -158,68 +154,68 @@ function App() {
     };
 
     const onTogglePlay = () => {
-        const [activeAudio, _] = getAudios();
+        const { active } = getAudios();
 
-        if (isPlay) activeAudio.current.pause();
-        else activeAudio.current.play();
+        if (isPlay) active.pause();
+        else active.play();
 
         setIsPlay(!isPlay);
     };
 
     const onPlay = () => {
-        const [activeAudio, _] = getAudios();
-        activeAudio.current.play();
+        const { active } = getAudios();
+        active.play();
         setIsPlay(true);
     };
 
     const onPause = () => {
-        const [activeAudio, _] = getAudios();
-        activeAudio.current.pause();
+        const { active } = getAudios();
+        active.pause();
         setIsPlay(false);
     };
 
     const onNext = () => {
-        const [_, nextAudio] = getAudios();
+        const { next } = getAudios();
         const index = getNextIndex(trackCurrentIndex, tracks.length, 1);
 
         setTrackCurrentIndex(index);
-        setActiveAudioId(nextAudio.id);
+        setActiveAudioId(next.id);
 
         updateMediaMetadata(tracks[index], identifier);
         localStorage.setItem("trackCurrentIndex", index);
     };
 
     const onPrev = () => {
-        const [_, __, prevAudio] = getAudios();
+        const { prev } = getAudios();
         const index = getNextIndex(trackCurrentIndex, tracks.length, -1);
 
         setTrackCurrentIndex(index);
-        setActiveAudioId(prevAudio.id);
+        setActiveAudioId(prev.id);
 
         updateMediaMetadata(tracks[index], identifier);
         localStorage.setItem("trackCurrentIndex", index);
     };
 
     const onTrack = (index) => {
-        const [activeAudio, _] = getAudios();
+        const { active } = getAudios();
 
-        activeAudio.current.src = tracks[index].url;
+        active.src = tracks[index].url;
 
         setTrackCurrentIndex(index);
-        setActiveAudioId(activeAudio.id);
+        setActiveAudioId(active.id);
 
         localStorage.setItem("trackCurrentIndex", index);
     };
 
     const onShuffle = () => {
-        const [activeAudio, _] = getAudios();
+        const { active } = getAudios();
         const shuffledTracksa = shuffleArray(tracks);
 
-        activeAudio.current.src = shuffledTracksa[0].url;
+        active.src = shuffledTracksa[0].url;
 
         setTracks(shuffledTracksa);
         setTrackCurrentIndex(0);
-        setActiveAudioId(activeAudio.id);
+        setActiveAudioId(active.id);
 
         localStorage.setItem("tracks", JSON.stringify(shuffledTracksa));
         localStorage.setItem("trackCurrentIndex", 0);
@@ -232,7 +228,7 @@ function App() {
     };
 
     return (
-        <main className="max-w-4xl mx-auto h-svh w-svw flex flex-col bg-black text-gray-100">
+        <main className="max-w-md mx-auto h-svh w-svw flex flex-col bg-black text-gray-100">
             {/* Header với identifier */}
             <div className="p-4 border-b border-gray-800">
                 <p
@@ -333,22 +329,23 @@ function App() {
 
                     {/* Track list */}
                     <div className="flex-1 overflow-hidden">
-                        <div className="h-full overflow-y-auto">
+                        <ul className="h-full overflow-y-auto">
                             {tracks.map((t, index) => (
-                                <div
+                                <li
                                     id={`track-${index}`}
                                     key={t.id}
                                     onClick={() => onTrack(index)}
-                                    className={`px-6 py-3 cursor-pointer transition-colors ${
+                                    className={`px-6 py-3 cursor-pointer transition-colors flex gap-2 justify-between w-full ${
                                         index === trackCurrentIndex
-                                            ? "text-black bg-gray-200"
+                                            ? "font-medium bg-gray-200/20"
                                             : "text-gray-200 hover:text-white hover:bg-gray-200/20"
                                     }`}
                                 >
-                                    <div className="truncate">{t.title}</div>
-                                </div>
+                                    <span className="truncate">{t.title}</span>
+                                    {index === trackCurrentIndex && <Music className={`animate-pulse`} />}
+                                </li>
                             ))}
-                        </div>
+                        </ul>
                     </div>
                 </>
             ) : (
@@ -368,5 +365,3 @@ function App() {
         </main>
     );
 }
-
-export default App;
