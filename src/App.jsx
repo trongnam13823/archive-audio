@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+import { Pause, Play, RotateCw, Shuffle, SkipBack, SkipForward } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 const fetchTracks = async (identifier) => {
@@ -221,102 +222,143 @@ function App() {
     };
 
     return (
-        <main className="p-4 w-svw h-svh">
-            <div className="flex flex-col gap-4 h-full">
-                <p
-                    contentEditable
-                    suppressContentEditableWarning={true}
-                    spellCheck={false}
-                    onBlur={onLoadIdentifier}
-                    className="focus:outline-0 text-center"
-                >
-                    {identifier || "Enter Identifier"}
-                </p>
+        <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-100">
+            <main className="p-4 w-svw h-svh max-w-4xl mx-auto">
+                <div className="flex flex-col gap-4 h-full">
+                    <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-3 border border-gray-700/30">
+                        <p
+                            contentEditable
+                            suppressContentEditableWarning={true}
+                            spellCheck={false}
+                            onBlur={onLoadIdentifier}
+                            className="focus:outline-0 text-center text-lg font-medium text-gray-200 bg-transparent focus:text-white transition-colors duration-200"
+                        >
+                            {identifier || "Enter Identifier"}
+                        </p>
+                    </div>
 
-                {tracks.length > 0 && !isTracksLoading ? (
-                    <div className="flex flex-col flex-1">
-                        <div className="space-y-4">
-                            <h1 className="text-xl truncate text-center font-bold">
-                                {tracks[trackCurrentIndex]?.title}
-                            </h1>
+                    {tracks.length > 0 && !isTracksLoading ? (
+                        <div className="flex flex-col flex-1">
+                            <div className="space-y-4 bg-gray-800/30 backdrop-blur-sm rounded-2xl p-5 border border-gray-700/30 shadow-xl">
+                                <h1 className="text-xl truncate text-center font-bold text-white">
+                                    {tracks[trackCurrentIndex]?.title}
+                                </h1>
 
-                            <audio
-                                ref={audioRefA}
-                                controls
-                                playsInline
-                                preload="auto"
-                                className={`mx-auto w-full ${activeAudioId === "A" ? "block" : "hidden"}`}
-                                onEnded={onNext}
-                            />
+                                <audio
+                                    ref={audioRefA}
+                                    controls
+                                    playsInline
+                                    preload="auto"
+                                    className={`mx-auto w-full rounded-lg ${
+                                        activeAudioId === "A" ? "block" : "hidden"
+                                    }`}
+                                    onEnded={onNext}
+                                    style={{ filter: "hue-rotate(200deg) saturate(0.8)" }}
+                                />
 
-                            <audio
-                                ref={audioRefB}
-                                controls
-                                playsInline
-                                preload="auto"
-                                className={`mx-auto w-full ${activeAudioId === "B" ? "block" : "hidden"}`}
-                                onEnded={onNext}
-                            />
+                                <audio
+                                    ref={audioRefB}
+                                    controls
+                                    playsInline
+                                    preload="auto"
+                                    className={`mx-auto w-full rounded-lg ${
+                                        activeAudioId === "B" ? "block" : "hidden"
+                                    }`}
+                                    onEnded={onNext}
+                                    style={{ filter: "hue-rotate(200deg) saturate(0.8)" }}
+                                />
 
-                            <audio
-                                ref={audioRefC}
-                                controls
-                                playsInline
-                                preload="auto"
-                                className={`mx-auto w-full ${activeAudioId === "C" ? "block" : "hidden"}`}
-                                onEnded={onNext}
-                            />
+                                <audio
+                                    ref={audioRefC}
+                                    controls
+                                    playsInline
+                                    preload="auto"
+                                    className={`mx-auto w-full rounded-lg ${
+                                        activeAudioId === "C" ? "block" : "hidden"
+                                    }`}
+                                    onEnded={onNext}
+                                    style={{ filter: "hue-rotate(200deg) saturate(0.8)" }}
+                                />
 
-                            <div className="flex items-center justify-evenly text-2xl">
-                                <button className="cursor-pointer size-10" onClick={onLoadIdentifier}>
-                                    <i className="ri-refresh-line" />
-                                </button>
-                                <button className="cursor-pointer size-10" onClick={onPrev}>
-                                    <i className="ri-skip-left-fill" />
-                                </button>
-                                <button className="cursor-pointer size-10" onClick={onTogglePlay}>
-                                    {isPlay ? <i className="ri-pause-fill" /> : <i className="ri-play-fill" />}
-                                </button>
-                                <button className="cursor-pointer size-10" onClick={onNext}>
-                                    <i className="ri-skip-right-fill" />
-                                </button>
-                                <button className="cursor-pointer size-10" onClick={onShuffle}>
-                                    <i className="ri-shuffle-line" />
-                                </button>
+                                <div className="flex items-center justify-evenly text-2xl">
+                                    <button
+                                        className="cursor-pointer size-10 p-2 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 hover:text-white transition-all duration-200 hover:scale-105"
+                                        onClick={onLoadIdentifier}
+                                    >
+                                        <RotateCw />
+                                    </button>
+                                    <button
+                                        className="cursor-pointer size-10 p-2 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 hover:text-white transition-all duration-200 hover:scale-105"
+                                        onClick={onPrev}
+                                    >
+                                        <SkipBack />
+                                    </button>
+                                    <button
+                                        className="cursor-pointer size-12 p-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white transition-all duration-200 hover:scale-105 shadow-lg"
+                                        onClick={onTogglePlay}
+                                    >
+                                        {isPlay ? <Pause /> : <Play />}
+                                    </button>
+                                    <button
+                                        className="cursor-pointer size-10 p-2 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 hover:text-white transition-all duration-200 hover:scale-105"
+                                        onClick={onNext}
+                                    >
+                                        <SkipForward />
+                                    </button>
+                                    <button
+                                        className="cursor-pointer size-10 p-2 rounded-full bg-gray-700/50 hover:bg-gray-600/70 text-gray-300 hover:text-white transition-all duration-200 hover:scale-105"
+                                        onClick={onShuffle}
+                                    >
+                                        <Shuffle />
+                                    </button>
+                                </div>
+
+                                <div className="flex items-center justify-between border-b border-gray-600/30 pb-2 mb-2">
+                                    <p className="text-gray-300 font-medium">Up next</p>
+                                    <p className="text-gray-400 text-sm">
+                                        {trackCurrentIndex + 1} / {tracks.length} tracks
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="flex items-center justify-between border-b pb-2 mb-2">
-                                <p>Up next</p>
-                                <p>
-                                    {trackCurrentIndex + 1} / {tracks.length} tracks
+                            <div className="flex-1 relative bg-gray-800/20 backdrop-blur-sm rounded-2xl mt-4 border border-gray-700/30 overflow-hidden">
+                                <ul className="absolute inset-0 overflow-y-auto">
+                                    {tracks.map((t, index) => (
+                                        <li
+                                            id={`track-${index}`}
+                                            key={t.id}
+                                            onClick={() => onTrack(index)}
+                                            className={`truncate py-3 px-4 transition-all duration-200 border-l-4 ${
+                                                index === trackCurrentIndex
+                                                    ? "font-bold bg-blue-600/20 text-white border-l-blue-500 pointer-events-none"
+                                                    : "hover:bg-gray-700/30 cursor-pointer text-gray-300 hover:text-white border-l-transparent hover:border-l-gray-500"
+                                            }`}
+                                        >
+                                            <span className="truncate">{t.title}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-8 border border-gray-700/30">
+                                <p className="text-center text-gray-400 text-lg">
+                                    {isTracksLoading ? (
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                                            Loading...
+                                        </div>
+                                    ) : (
+                                        "No tracks"
+                                    )}
                                 </p>
                             </div>
                         </div>
-
-                        <div className="flex-1 relative">
-                            <ul className="absolute inset-0 overflow-y-auto">
-                                {tracks.map((t, index) => (
-                                    <li
-                                        id={`track-${index}`}
-                                        key={t.id}
-                                        onClick={() => onTrack(index)}
-                                        className={`truncate py-2 px-1 ${
-                                            index === trackCurrentIndex
-                                                ? "font-bold bg-white text-black pointer-events-none"
-                                                : "hover:bg-black/10 cursor-pointer"
-                                        }`}
-                                    >
-                                        {t.title}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                ) : (
-                    <p className="text-center">{isTracksLoading ? "Loading..." : "No tracks"}</p>
-                )}
-            </div>
-        </main>
+                    )}
+                </div>
+            </main>
+        </div>
     );
 }
 
