@@ -213,8 +213,58 @@ export default function ArchiveAudio() {
     changeTrack
   );
 
+  // ================= Timer ===================
+  const [timerValue, setTimerValue] = useState("00:00"); // format hh:mm
+  const [remaining, setRemaining] = useState(0);
+  const timerRef = useRef(null);
+
+  const startTimer = () => {
+    const [hours, minutes] = timerValue.split(":").map(Number);
+    const totalMs = (hours * 60 + minutes) * 60 * 1000;
+    if (totalMs <= 0) return;
+
+    setRemaining(totalMs);
+
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    const endTime = Date.now() + totalMs;
+
+    timerRef.current = setInterval(() => {
+      const diff = endTime - Date.now();
+      if (diff <= 0) {
+        clearInterval(timerRef.current);
+        setRemaining(0);
+        pauseAudio();
+        alert("Thời gian nghe nhạc đã kết thúc!");
+        return;
+      }
+      setRemaining(diff);
+    }, 1000);
+  };
+
+  const clearTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    setRemaining(0);
+    setTimerValue("00:00");
+  };
+
+  const formatRemaining = (ms) => {
+    const totalSec = Math.ceil(ms / 1000);
+    const h = Math.floor(totalSec / 3600)
+      .toString()
+      .padStart(2, "0");
+    const m = Math.floor((totalSec % 3600) / 60)
+      .toString()
+      .padStart(2, "0");
+    const s = (totalSec % 60).toString().padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
+
+  // ==========================================
+
   return (
     <main className="max-w-md mx-auto h-screen flex flex-col bg-black text-gray-100">
+      {/* Input identifier */}
       <div className="p-4 border-b border-gray-800 text-center text-lg font-medium text-gray-300">
         <input
           type="text"
@@ -224,6 +274,40 @@ export default function ArchiveAudio() {
           onKeyDown={(e) => e.key === "Enter" && handleIdentifierSubmit()}
           className="w-full bg-gray-900 border border-gray-700 text-white px-2 py-1 rounded text-center"
         />
+      </div>
+
+      {/* Timer */}
+      <div className="p-4 border-b border-gray-800 text-center text-gray-300 flex items-center justify-center gap-2">
+        {remaining > 0 ? (
+          <>
+            <span className="ml-2 text-white font-mono">
+              {formatRemaining(remaining)}
+            </span>
+
+            <button
+              onClick={clearTimer}
+              className="px-2 py-1 bg-red-600 hover:bg-red-500 rounded"
+            >
+              Hủy
+            </button>
+          </>
+        ) : (
+          <>
+            <input
+              type="time"
+              value={timerValue}
+              onChange={(e) => setTimerValue(e.target.value)}
+              className="bg-gray-900 border border-gray-700 text-white px-2 py-1 rounded"
+              step={60}
+            />
+            <button
+              onClick={startTimer}
+              className="px-2 py-1 bg-green-600 hover:bg-green-500 rounded"
+            >
+              Bắt đầu
+            </button>
+          </>
+        )}
       </div>
 
       {isLoading ? (
