@@ -348,7 +348,10 @@ export default function ArchiveAudio() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handlePlay = () => setIsPlaying(true);
+    const handlePlay = () => {
+      setIsPlaying(true);
+      console.log(123);
+    };
     const handlePause = () => setIsPlaying(false);
 
     audio.addEventListener("play", handlePlay);
