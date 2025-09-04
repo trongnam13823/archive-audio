@@ -193,6 +193,15 @@ export default function ArchiveAudio() {
       audio.currentTime = 0; // reset time cho bài mới
     }
 
+    localStorage.setItem(
+      "playerState",
+      JSON.stringify({
+        identifier,
+        currentIndex,
+        currentTime: audio.currentTime,
+      })
+    );
+
     audio.play().catch(() => {});
   }, [currentIndex, tracks, identifier]);
 
