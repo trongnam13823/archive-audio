@@ -181,28 +181,39 @@ export default function ArchiveAudio() {
     const audio = audioRef.current;
     audio.src = tracks[currentIndex]?.url || "";
 
+    // Nếu cùng identifier và có trạng thái lưu, chỉ khôi phục lần đầu load track
     const saved = JSON.parse(localStorage.getItem("playerState") || "{}");
-    if (saved.identifier === identifier && saved.currentTime != null) {
+    if (
+      saved.identifier === identifier &&
+      saved.currentIndex === currentIndex &&
+      saved.currentTime != null
+    ) {
       audio.currentTime = saved.currentTime;
+    } else {
+      audio.currentTime = 0; // reset time cho bài mới
     }
 
     audio.play().catch(() => {});
-  }, [currentIndex, tracks]);
+  }, [currentIndex, tracks, identifier]);
 
-  // Lưu trạng thái mỗi khi currentIndex hoặc thời gian thay đổi
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (!audioRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const onTimeUpdate = () => {
       localStorage.setItem(
         "playerState",
         JSON.stringify({
           identifier,
           currentIndex,
-          currentTime: audioRef.current.currentTime,
+          currentTime: audio.currentTime,
         })
       );
-    }, 1000); // lưu mỗi 1s
-    return () => clearInterval(interval);
+    };
+
+    audio.addEventListener("timeupdate", onTimeUpdate);
+
+    return () => audio.removeEventListener("timeupdate", onTimeUpdate);
   }, [currentIndex, identifier]);
 
   useMediaSession(
