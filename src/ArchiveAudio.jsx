@@ -338,10 +338,10 @@ export default function ArchiveAudio() {
         <>
           {/* Timer */}
           <div className="p-4 border-b border-gray-800 text-center text-gray-300 flex items-center justify-center gap-2">
-            <b>Hẹn giờ: </b>
+            <span>Hẹn giờ: </span>
             {remaining > 0 ? (
               <>
-                <span className="ml-2 text-white font-mono">
+                <span className=" text-white tracking-widest">
                   {formatRemaining(remaining)}
                 </span>
 
