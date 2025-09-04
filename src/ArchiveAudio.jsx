@@ -434,9 +434,13 @@ export default function ArchiveAudio() {
               </button>
               <button
                 onClick={togglePlay}
-                className="flex justify-center items-center bg-transparent hover:bg-gray-200/20 rounded-full p-2"
+                className="flex justify-center items-center cursor-pointer rounded-full p-4 bg-white hover:scale-105 "
               >
-                {isPlaying ? <Pause size={24} /> : <Play size={24} />}
+                {isPlaying ? (
+                  <Pause size={24} color="#000" />
+                ) : (
+                  <Play size={24} color="#000" />
+                )}
               </button>
               <button
                 className="cursor-pointer size-10 flex justify-center items-center bg-transparent hover:bg-gray-200/20 rounded-full"
