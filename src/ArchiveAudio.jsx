@@ -68,7 +68,14 @@ const useTracks = (identifier) => {
       try {
         const fetched = await fetchTracks(identifier);
         setTracks(fetched);
-        setCurrentIndex(0);
+
+        // Phục hồi trạng thái lưu trữ
+        const saved = JSON.parse(localStorage.getItem("playerState") || "{}");
+        if (saved.identifier === identifier && saved.currentIndex != null) {
+          setCurrentIndex(saved.currentIndex);
+        } else {
+          setCurrentIndex(0);
+        }
       } catch (err) {
         console.error("Failed to fetch tracks:", err);
         setTracks([]);
@@ -168,12 +175,35 @@ export default function ArchiveAudio() {
     }
   };
 
+  // Khi thay đổi track, set src audio và play
   useEffect(() => {
     if (!tracks.length) return;
     const audio = audioRef.current;
     audio.src = tracks[currentIndex]?.url || "";
+
+    const saved = JSON.parse(localStorage.getItem("playerState") || "{}");
+    if (saved.identifier === identifier && saved.currentTime != null) {
+      audio.currentTime = saved.currentTime;
+    }
+
     audio.play().catch(() => {});
   }, [currentIndex, tracks]);
+
+  // Lưu trạng thái mỗi khi currentIndex hoặc thời gian thay đổi
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!audioRef.current) return;
+      localStorage.setItem(
+        "playerState",
+        JSON.stringify({
+          identifier,
+          currentIndex,
+          currentTime: audioRef.current.currentTime,
+        })
+      );
+    }, 1000); // lưu mỗi 1s
+    return () => clearInterval(interval);
+  }, [currentIndex, identifier]);
 
   useMediaSession(
     tracks[currentIndex],
