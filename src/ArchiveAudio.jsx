@@ -280,6 +280,21 @@ export default function ArchiveAudio() {
   };
   // ==========================================
 
+  const listRef = useRef(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list) return;
+    const item = list.children[currentIndex];
+
+    // scroll sao cho item hiện tại ở giữa list
+    const scrollTop =
+      currentIndex * item.clientHeight -
+      list.clientHeight / 2 +
+      item.clientHeight / 2;
+    list.scrollTo({ top: scrollTop, behavior: "smooth" });
+  }, [currentIndex]);
+
   return (
     <main className="max-w-md mx-auto h-screen flex flex-col bg-black text-gray-100">
       {/* Input identifier */}
@@ -382,7 +397,7 @@ export default function ArchiveAudio() {
             </div>
           </div>
 
-          <ul className="flex-1 overflow-y-auto">
+          <ul ref={listRef} className="flex-1 overflow-y-auto">
             {tracks.map((t, idx) => (
               <li
                 key={t.id}
