@@ -4,6 +4,8 @@ import {
   RotateCw,
   Music,
   SkipBack,
+  Play,
+  Pause,
   SkipForward,
   Shuffle,
 } from "lucide-react";
@@ -328,6 +330,37 @@ export default function ArchiveAudio() {
   };
   // ==========================================
 
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const togglePlay = () => {
+    if (!audioRef.current) return;
+    if (audioRef.current.paused) {
+      enableNoSleep();
+      audioRef.current.play().catch(() => {});
+      setIsPlaying(true);
+    } else {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  };
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    audio.addEventListener("play", handlePlay);
+    audio.addEventListener("pause", handlePause);
+
+    // Cleanup khi component unmount
+    return () => {
+      audio.removeEventListener("play", handlePlay);
+      audio.removeEventListener("pause", handlePause);
+    };
+  }, []);
+
   return (
     <main className="max-w-md mx-auto h-screen flex flex-col bg-black text-gray-100">
       {isLoading ? (
@@ -398,6 +431,12 @@ export default function ArchiveAudio() {
                 onClick={() => changeTrack(-1)}
               >
                 <SkipBack size={20} />
+              </button>
+              <button
+                onClick={togglePlay}
+                className="flex justify-center items-center bg-transparent hover:bg-gray-200/20 rounded-full p-2"
+              >
+                {isPlaying ? <Pause size={24} /> : <Play size={24} />}
               </button>
               <button
                 className="cursor-pointer size-10 flex justify-center items-center bg-transparent hover:bg-gray-200/20 rounded-full"
