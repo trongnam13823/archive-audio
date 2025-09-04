@@ -39,15 +39,13 @@ const fetchTracks = async (identifier) => {
   });
 };
 
-const updateMediaMetadata = (track, identifier) => {
+const updateMediaMetadata = (track) => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track?.title || "Unknown Title",
-      artist: identifier || "Unknown Artist",
-      album: "Unknown Album",
       artwork: [
         {
-          src: "https://yt3.googleusercontent.com/jodQngzGXTMgzCuUlgFJFg1MOvMK797ez9K7gsO40owPy9VwfR7AZlJ6UauWCVadk3DRa1VslQ=s160-c-k-c0x00ffffff-no-rj",
+          src: "/tacgiasuthatman.jpg",
           sizes: "512x512",
           type: "image/png",
         },
