@@ -186,6 +186,8 @@ export default function ArchiveAudio() {
     localStorage.getItem("identifier") ?? "tiktok-tacgiasuthatman"
   );
 
+  const [isPlaying, setIsPlaying] = useState(false);
+
   const {
     tracks,
     currentIndex,
@@ -236,7 +238,10 @@ export default function ArchiveAudio() {
       tracks,
     });
 
-    audio.play().catch(() => {});
+    audio
+      .play()
+      .then(() => setIsPlaying(true))
+      .catch(() => {});
   }, [currentIndex, tracks, identifier]);
 
   // ===== Lưu thời gian playback =====
@@ -330,8 +335,6 @@ export default function ArchiveAudio() {
   };
   // ==========================================
 
-  const [isPlaying, setIsPlaying] = useState(false);
-
   const togglePlay = () => {
     if (!audioRef.current) return;
     if (audioRef.current.paused) {
@@ -348,10 +351,7 @@ export default function ArchiveAudio() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handlePlay = () => {
-      setIsPlaying(true);
-      console.log(123);
-    };
+    const handlePlay = () => setIsPlaying(true);
     const handlePause = () => setIsPlaying(false);
 
     audio.addEventListener("play", handlePlay);
