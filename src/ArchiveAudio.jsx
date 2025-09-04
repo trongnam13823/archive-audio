@@ -214,30 +214,38 @@ export default function ArchiveAudio() {
   );
 
   // ================= Timer ===================
-  const [timerValue, setTimerValue] = useState("00:00"); // format hh:mm
+  const [timerValue, setTimerValue] = useState("00:00"); // format HH:MM
   const [remaining, setRemaining] = useState(0);
   const timerRef = useRef(null);
 
   const startTimer = () => {
     const [hours, minutes] = timerValue.split(":").map(Number);
-    const totalMs = (hours * 60 + minutes) * 60 * 1000;
-    if (totalMs <= 0) return;
+    const now = new Date();
+    const targetTime = new Date();
+    targetTime.setHours(hours, minutes, 0, 0);
 
-    setRemaining(totalMs);
+    // Nếu giờ đã qua hôm nay, tính cho ngày mai
+    if (targetTime <= now) {
+      targetTime.setDate(targetTime.getDate() + 1);
+    }
+
+    const diffMs = targetTime - now;
+    setRemaining(diffMs);
 
     if (timerRef.current) clearInterval(timerRef.current);
 
-    const endTime = Date.now() + totalMs;
-
     timerRef.current = setInterval(() => {
-      const diff = endTime - Date.now();
+      const now = new Date();
+      const diff = targetTime - now;
+
       if (diff <= 0) {
         clearInterval(timerRef.current);
         setRemaining(0);
         pauseAudio();
-        alert("Thời gian nghe nhạc đã kết thúc!");
+        alert("Đã đến giờ hẹn! Dừng phát nhạc.");
         return;
       }
+
       setRemaining(diff);
     }, 1000);
   };
@@ -245,9 +253,9 @@ export default function ArchiveAudio() {
   const clearTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     setRemaining(0);
-    setTimerValue("00:00");
   };
 
+  // format thời gian còn lại
   const formatRemaining = (ms) => {
     const totalSec = Math.ceil(ms / 1000);
     const h = Math.floor(totalSec / 3600)
@@ -259,7 +267,6 @@ export default function ArchiveAudio() {
     const s = (totalSec % 60).toString().padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
-
   // ==========================================
 
   return (
