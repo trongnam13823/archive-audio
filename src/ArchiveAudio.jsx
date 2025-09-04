@@ -412,7 +412,6 @@ export default function ArchiveAudio() {
               ref={audioRef}
               playsInline
               preload="auto"
-              controls
               style={{ width: "100%", appearance: "none" }}
               onPlay={() => enableNoSleep()}
               onEnded={() => changeTrack(1)}
