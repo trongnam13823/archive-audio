@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import NoSleep from "nosleep.js";
 
+// ===== Helper =====
 const shuffleArray = (array) => {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -55,6 +56,23 @@ const updateMediaMetadata = (track) => {
   }
 };
 
+// ===== LocalStorage helpers =====
+const savePlayerState = ({ identifier, currentIndex, currentTime, tracks }) => {
+  const state = {
+    ...JSON.parse(localStorage.getItem("playerState") || "{}"),
+    identifier,
+    currentIndex,
+    currentTime,
+    ...(tracks ? { tracks } : {}),
+  };
+  localStorage.setItem("playerState", JSON.stringify(state));
+};
+
+const loadPlayerState = () => {
+  return JSON.parse(localStorage.getItem("playerState") || "{}");
+};
+
+// ===== Custom hooks =====
 const useTracks = (identifier) => {
   const [tracks, setTracks] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -64,16 +82,22 @@ const useTracks = (identifier) => {
     const load = async () => {
       if (!identifier) return;
       setIsLoading(true);
-      try {
-        const fetched = await fetchTracks(identifier);
-        setTracks(fetched);
 
-        // Phục hồi trạng thái lưu trữ
-        const saved = JSON.parse(localStorage.getItem("playerState") || "{}");
-        if (saved.identifier === identifier && saved.currentIndex != null) {
-          setCurrentIndex(saved.currentIndex);
+      try {
+        const saved = loadPlayerState();
+        if (saved.identifier === identifier && saved.tracks?.length) {
+          setTracks(saved.tracks);
+          setCurrentIndex(saved.currentIndex ?? 0);
         } else {
+          const fetched = await fetchTracks(identifier);
+          setTracks(fetched);
           setCurrentIndex(0);
+          savePlayerState({
+            identifier,
+            currentIndex: 0,
+            currentTime: 0,
+            tracks: fetched,
+          });
         }
       } catch (err) {
         console.error("Failed to fetch tracks:", err);
@@ -83,8 +107,43 @@ const useTracks = (identifier) => {
         setIsLoading(false);
       }
     };
+
     load();
   }, [identifier]);
+
+  const shuffleTracksHandler = () => {
+    setTracks((prev) => {
+      const shuffled = shuffleArray(prev);
+      savePlayerState({
+        identifier,
+        currentIndex: 0,
+        currentTime: 0,
+        tracks: shuffled,
+      });
+      return shuffled;
+    });
+    setCurrentIndex(0);
+  };
+
+  const reloadTracksHandler = async () => {
+    if (!identifier) return;
+    setIsLoading(true);
+    try {
+      const fetched = await fetchTracks(identifier);
+      setTracks(fetched);
+      setCurrentIndex(0);
+      savePlayerState({
+        identifier,
+        currentIndex: 0,
+        currentTime: 0,
+        tracks: fetched,
+      });
+    } catch (err) {
+      console.error("Failed to reload tracks:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     tracks,
@@ -93,13 +152,15 @@ const useTracks = (identifier) => {
     setTracks,
     isLoading,
     setIsLoading,
+    shuffleTracksHandler,
+    reloadTracksHandler,
   };
 };
 
-const useMediaSession = (track, identifier, play, pause, change) => {
+const useMediaSession = (track, play, pause, change) => {
   useEffect(() => {
     if (!track || !("mediaSession" in navigator)) return;
-    updateMediaMetadata(track, identifier);
+    updateMediaMetadata(track);
 
     navigator.mediaSession.setActionHandler("play", play);
     navigator.mediaSession.setActionHandler("pause", pause);
@@ -117,19 +178,19 @@ const useNoSleep = () => {
   return enable;
 };
 
+// ===== Component chính =====
 export default function ArchiveAudio() {
   const [identifier, setIdentifier] = useState(
     localStorage.getItem("identifier") ?? "tiktok-tacgiasuthatman"
   );
-  const [inputValue, setInputValue] = useState(identifier);
 
   const {
     tracks,
     currentIndex,
     setCurrentIndex,
-    setTracks,
     isLoading,
-    setIsLoading,
+    shuffleTracksHandler,
+    reloadTracksHandler,
   } = useTracks(identifier);
 
   const audioRef = useRef(null);
@@ -149,40 +210,13 @@ export default function ArchiveAudio() {
     setCurrentIndex((prev) => (prev + step + tracks.length) % tracks.length);
   };
 
-  const shuffleTracks = () => {
-    setTracks((prev) => shuffleArray(prev));
-    setCurrentIndex(0);
-  };
-
-  const reloadTracks = async () => {
-    if (!identifier) return;
-    setIsLoading(true); // <-- bật loading trước khi fetch
-    try {
-      const fetched = await fetchTracks(identifier);
-      setTracks(fetched);
-      setCurrentIndex(0);
-    } catch (err) {
-      console.error("Failed to reload tracks:", err);
-    } finally {
-      setIsLoading(false); // <-- tắt loading sau khi fetch xong
-    }
-  };
-
-  const handleIdentifierSubmit = () => {
-    if (inputValue.trim() && inputValue !== identifier) {
-      setIdentifier(inputValue.trim());
-      localStorage.setItem("identifier", inputValue.trim());
-    }
-  };
-
-  // Khi thay đổi track, set src audio và play
+  // ===== Khi track thay đổi =====
   useEffect(() => {
     if (!tracks.length) return;
     const audio = audioRef.current;
     audio.src = tracks[currentIndex]?.url || "";
 
-    // Nếu cùng identifier và có trạng thái lưu, chỉ khôi phục lần đầu load track
-    const saved = JSON.parse(localStorage.getItem("playerState") || "{}");
+    const saved = loadPlayerState();
     if (
       saved.identifier === identifier &&
       saved.currentIndex === currentIndex &&
@@ -190,104 +224,38 @@ export default function ArchiveAudio() {
     ) {
       audio.currentTime = saved.currentTime;
     } else {
-      audio.currentTime = 0; // reset time cho bài mới
+      audio.currentTime = 0;
     }
 
-    localStorage.setItem(
-      "playerState",
-      JSON.stringify({
-        identifier,
-        currentIndex,
-        currentTime: audio.currentTime,
-      })
-    );
+    savePlayerState({
+      identifier,
+      currentIndex,
+      currentTime: audio.currentTime,
+      tracks,
+    });
 
     audio.play().catch(() => {});
   }, [currentIndex, tracks, identifier]);
 
+  // ===== Lưu thời gian playback =====
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const onTimeUpdate = () => {
-      localStorage.setItem(
-        "playerState",
-        JSON.stringify({
-          identifier,
-          currentIndex,
-          currentTime: audio.currentTime,
-        })
-      );
+      savePlayerState({
+        identifier,
+        currentIndex,
+        currentTime: audio.currentTime,
+        tracks,
+      });
     };
 
     audio.addEventListener("timeupdate", onTimeUpdate);
-
     return () => audio.removeEventListener("timeupdate", onTimeUpdate);
-  }, [currentIndex, identifier]);
+  }, [currentIndex, identifier, tracks]);
 
-  useMediaSession(
-    tracks[currentIndex],
-    identifier,
-    playAudio,
-    pauseAudio,
-    changeTrack
-  );
-
-  // ================= Timer ===================
-  const [timerValue, setTimerValue] = useState("00:00"); // format HH:MM
-  const [remaining, setRemaining] = useState(0);
-  const timerRef = useRef(null);
-
-  const startTimer = () => {
-    const [hours, minutes] = timerValue.split(":").map(Number);
-    const now = new Date();
-    const targetTime = new Date();
-    targetTime.setHours(hours, minutes, 0, 0);
-
-    // Nếu giờ đã qua hôm nay, tính cho ngày mai
-    if (targetTime <= now) {
-      targetTime.setDate(targetTime.getDate() + 1);
-    }
-
-    const diffMs = targetTime - now;
-    setRemaining(diffMs);
-
-    if (timerRef.current) clearInterval(timerRef.current);
-
-    timerRef.current = setInterval(() => {
-      const now = new Date();
-      const diff = targetTime - now;
-
-      if (diff <= 0) {
-        clearInterval(timerRef.current);
-        setRemaining(0);
-        pauseAudio();
-        alert("Đã đến giờ hẹn! Dừng phát nhạc.");
-        return;
-      }
-
-      setRemaining(diff);
-    }, 1000);
-  };
-
-  const clearTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setRemaining(0);
-  };
-
-  // format thời gian còn lại
-  const formatRemaining = (ms) => {
-    const totalSec = Math.ceil(ms / 1000);
-    const h = Math.floor(totalSec / 3600)
-      .toString()
-      .padStart(2, "0");
-    const m = Math.floor((totalSec % 3600) / 60)
-      .toString()
-      .padStart(2, "0");
-    const s = (totalSec % 60).toString().padStart(2, "0");
-    return `${h}:${m}:${s}`;
-  };
-  // ==========================================
+  useMediaSession(tracks[currentIndex], playAudio, pauseAudio, changeTrack);
 
   const listRef = useRef(null);
 
@@ -295,8 +263,8 @@ export default function ArchiveAudio() {
     const list = listRef.current;
     if (!list) return;
     const item = list.children[currentIndex];
+    if (!item) return;
 
-    // scroll sao cho item hiện tại ở giữa list
     const scrollTop =
       currentIndex * item.clientHeight -
       list.clientHeight / 2 +
@@ -306,53 +274,6 @@ export default function ArchiveAudio() {
 
   return (
     <main className="max-w-md mx-auto h-screen flex flex-col bg-black text-gray-100">
-      {/* Input identifier */}
-      {/* <div className="p-4 border-b border-gray-800 text-center text-lg font-medium text-gray-300">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onBlur={handleIdentifierSubmit}
-          onKeyDown={(e) => e.key === "Enter" && handleIdentifierSubmit()}
-          className="w-full bg-gray-900 border border-gray-700 text-white px-2 py-1 rounded text-center"
-        />
-      </div> */}
-
-      {/* Timer */}
-      <div className="p-4 border-b border-gray-800 text-center text-gray-300 flex items-center justify-center gap-2">
-        <b>Hẹn giờ: </b>
-        {remaining > 0 ? (
-          <>
-            <span className="ml-2 text-white font-mono">
-              {formatRemaining(remaining)}
-            </span>
-
-            <button
-              onClick={clearTimer}
-              className="px-2 py-1 bg-red-600 hover:bg-red-500 rounded"
-            >
-              Hủy
-            </button>
-          </>
-        ) : (
-          <>
-            <input
-              type="time"
-              value={timerValue}
-              onChange={(e) => setTimerValue(e.target.value)}
-              className="bg-gray-900 border border-gray-700 text-white px-2 py-1 rounded"
-              step={60}
-            />
-            <button
-              onClick={startTimer}
-              className="px-2 py-1 bg-green-600 hover:bg-green-500 rounded"
-            >
-              Bắt đầu
-            </button>
-          </>
-        )}
-      </div>
-
       {isLoading ? (
         <div className="flex-1 flex items-center justify-center">
           <LoaderCircle className="animate-spin mr-2" /> Loading...
@@ -377,7 +298,7 @@ export default function ArchiveAudio() {
             <div className="flex items-center justify-evenly gap-4 mb-4 mt-4">
               <button
                 className="cursor-pointer size-10 flex justify-center items-center bg-transparent hover:bg-gray-200/20 rounded-full"
-                onClick={reloadTracks}
+                onClick={reloadTracksHandler}
               >
                 <RotateCw size={20} />
               </button>
@@ -396,7 +317,7 @@ export default function ArchiveAudio() {
               </button>
               <button
                 className="cursor-pointer size-10 flex justify-center items-center bg-transparent hover:bg-gray-200/20 rounded-full"
-                onClick={shuffleTracks}
+                onClick={shuffleTracksHandler}
               >
                 <Shuffle size={20} />
               </button>
