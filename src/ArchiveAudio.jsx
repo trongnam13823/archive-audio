@@ -43,6 +43,7 @@ const updateMediaMetadata = (track) => {
   if ("mediaSession" in navigator) {
     navigator.mediaSession.metadata = new MediaMetadata({
       title: track?.title || "Unknown Title",
+      artist: "Sự Thật Man",
       artwork: [
         {
           src: "/tacgiasuthatman.jpg",
@@ -296,7 +297,7 @@ export default function ArchiveAudio() {
   return (
     <main className="max-w-md mx-auto h-screen flex flex-col bg-black text-gray-100">
       {/* Input identifier */}
-      <div className="p-4 border-b border-gray-800 text-center text-lg font-medium text-gray-300">
+      {/* <div className="p-4 border-b border-gray-800 text-center text-lg font-medium text-gray-300">
         <input
           type="text"
           value={inputValue}
@@ -305,7 +306,7 @@ export default function ArchiveAudio() {
           onKeyDown={(e) => e.key === "Enter" && handleIdentifierSubmit()}
           className="w-full bg-gray-900 border border-gray-700 text-white px-2 py-1 rounded text-center"
         />
-      </div>
+      </div> */}
 
       {/* Timer */}
       <div className="p-4 border-b border-gray-800 text-center text-gray-300 flex items-center justify-center gap-2">
