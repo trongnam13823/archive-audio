@@ -103,11 +103,15 @@ export default function ArchivePlayer() {
     }
   };
 
-  const onPrev = () =>
+  const onPrev = () => {
+    setCurrentTime(0);
     setCurrentIndex(getCircularIndex(currentIndex, -1, tracks));
+  };
 
-  const onNext = () =>
+  const onNext = () => {
+    setCurrentTime(0);
     setCurrentIndex(getCircularIndex(currentIndex, +1, tracks));
+  };
 
   const onReload = async () => {
     await fetchTracks();
