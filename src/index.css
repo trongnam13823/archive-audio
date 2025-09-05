@@ -1,13 +1,11 @@
 @import "tailwindcss";
 
 html {
-    color-scheme: dark;
+  color-scheme: dark;
 }
 
 body {
-    font-family: system-ui;
-}
-
-audio::-webkit-media-controls-play-button {
-    display: none !important;
+  font-family: system-ui;
+  background-color: #000;
+  color: #fff;
 }
