@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 export default (identifier) => {
   const [tracks, setTracks] = useState([]);
@@ -39,6 +39,10 @@ export default (identifier) => {
   const shuffleTracks = () => {
     setTracks((prev) => shuffleArray(prev));
   };
+
+  useEffect(() => {
+    fetchTracks();
+  }, []);
 
   return {
     identifier,

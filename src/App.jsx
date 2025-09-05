@@ -8,7 +8,6 @@ import NoSleep from "nosleep.js";
 
 export default function PlayerWrapper() {
   const {
-    identifier,
     tracks,
     isTracksLoading,
     fetchTracks,
@@ -16,7 +15,6 @@ export default function PlayerWrapper() {
     currentIndex,
     setCurrentIndex,
     shuffleTracks,
-    setIsTracksLoading,
   } = useTracks("tiktok-tacgiasuthatman");
 
   const playerRef = useRef(null);
