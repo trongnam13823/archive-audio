@@ -83,6 +83,7 @@ export default function ArchivePlayer() {
     if (tracks.length < 1 || !audioRef.current) return;
 
     audioRef.current.src = tracks[currentIndex].url;
+    audioRef.current.play().catch(() => {});
   }, [currentIndex, tracks]);
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export default function ArchivePlayer() {
 
   const onTogglePlay = () => {
     if (audioRef?.current.paused) {
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {});
     } else {
       audioRef.current.pause();
     }
@@ -143,10 +144,6 @@ export default function ArchivePlayer() {
       setAudioLoading(false);
     };
 
-    const onLoadeddata = () => {
-      audioRef.current.play();
-    };
-
     const onTimeupdate = () => {
       setCurrentTime(audioRef.current.currentTime);
     };
@@ -155,7 +152,6 @@ export default function ArchivePlayer() {
     audioRef.current.addEventListener("pause", onPause);
     audioRef.current.addEventListener("loadstart", onLoadstart);
     audioRef.current.addEventListener("loadedmetadata", onLoadedmetadata);
-    audioRef.current.addEventListener("loadeddata", onLoadeddata);
     audioRef.current.addEventListener("ended", onNext);
     audioRef.current.addEventListener("timeupdate", onTimeupdate);
 
@@ -164,8 +160,6 @@ export default function ArchivePlayer() {
       audioRef.current.removeEventListener("pause", onPause);
       audioRef.current.removeEventListener("loadstart", onLoadstart);
       audioRef.current.removeEventListener("loadedmetadata", onLoadedmetadata);
-
-      audioRef.current.removeEventListener("loadeddata", onLoadeddata);
       audioRef.current.removeEventListener("ended", onNext);
       audioRef.current.removeEventListener("timeupdate", onTimeupdate);
     };
