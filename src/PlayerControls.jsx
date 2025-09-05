@@ -54,7 +54,9 @@ const PlayerControls = ({
 
       <div className="flex items-center justify-between gap-2">
         <span>
-          {formatDuration(value ? (value / 100) * duration : currentTime)}
+          {formatDuration(
+            value && duration ? (value / 100) * duration : currentTime
+          )}
         </span>
         <input
           type="range"
