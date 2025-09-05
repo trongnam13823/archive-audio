@@ -56,22 +56,13 @@ export default function ArchivePlayer() {
   }, []);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (!audioRef.current) return;
-      savePlayerState({
-        identifier,
-        tracks,
-        currentIndex,
-        currentTime: audioRef.current.currentTime,
-      });
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [identifier, tracks, currentIndex]);
+    savePlayerState({
+      identifier,
+      tracks,
+      currentIndex,
+      currentTime,
+    });
+  }, [identifier, tracks, currentIndex, currentTime]);
 
   useEffect(() => {
     if (!init || !audioRef.current) return;
