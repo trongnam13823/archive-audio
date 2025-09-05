@@ -139,8 +139,11 @@ export default function ArchivePlayer() {
       setPaused(true);
     };
 
-    const onLoadeddata = () => {
+    const onLoadedmetadata = () => {
       setAudioLoading(false);
+    };
+
+    const onLoadeddata = () => {
       audioRef.current.play();
     };
 
@@ -151,6 +154,7 @@ export default function ArchivePlayer() {
     audioRef.current.addEventListener("play", onPlay);
     audioRef.current.addEventListener("pause", onPause);
     audioRef.current.addEventListener("loadstart", onLoadstart);
+    audioRef.current.addEventListener("loadedmetadata", onLoadedmetadata);
     audioRef.current.addEventListener("loadeddata", onLoadeddata);
     audioRef.current.addEventListener("ended", onNext);
     audioRef.current.addEventListener("timeupdate", onTimeupdate);
@@ -159,6 +163,8 @@ export default function ArchivePlayer() {
       audioRef.current.removeEventListener("play", onPlay);
       audioRef.current.removeEventListener("pause", onPause);
       audioRef.current.removeEventListener("loadstart", onLoadstart);
+      audioRef.current.removeEventListener("loadedmetadata", onLoadedmetadata);
+
       audioRef.current.removeEventListener("loadeddata", onLoadeddata);
       audioRef.current.removeEventListener("ended", onNext);
       audioRef.current.removeEventListener("timeupdate", onTimeupdate);
