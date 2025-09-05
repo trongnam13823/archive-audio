@@ -70,6 +70,8 @@ export default function PlayerWrapper() {
   // Xáo trộn tracks
   const onShuffle = useCallback(() => {
     shuffleTracks();
+    setCurrentTime(0);
+    playerRef.current.currentTime = 0;
     setCurrentIndex(0);
   }, [setTracks]);
 
