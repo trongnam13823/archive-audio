@@ -127,52 +127,9 @@ export default function PlayerWrapper() {
     [setDuration]
   );
 
-  const onReady = useCallback(() => {
-    if (currentTime) {
-      playerRef.current.currentTime = currentTime;
-    }
-  }, [currentTime]);
-
   const onPlay = useCallback(() => {
     noSleepRef.current.enable();
   }, [noSleepRef]);
-
-  // Load trạng thái player từ localStorage
-  useEffect(() => {
-    const state = loadPlayerState();
-    if (state) {
-      setTracks(state.tracks);
-      setCurrentIndex(state.currentIndex);
-      setCurrentTime(state.currentTime);
-      setIsTracksLoading(false);
-    } else {
-      fetchTracks();
-    }
-  }, [playerRef]);
-
-  // Lưu trạng thái player vào localStorage khi thay đổi
-  useEffect(() => {
-    const handleSaveState = () => {
-      savePlayerState({
-        identifier,
-        tracks,
-        currentIndex,
-        currentTime,
-      });
-    };
-
-    window.addEventListener("beforeunload", handleSaveState);
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "hidden") {
-        handleSaveState();
-      }
-    });
-
-    return () => {
-      window.removeEventListener("beforeunload", handleSaveState);
-      document.removeEventListener("visibilitychange", handleSaveState);
-    };
-  }, [identifier, tracks, currentIndex, currentTime]);
 
   return (
     <div className="w-svw h-svh flex flex-col justify-center items-center">
@@ -190,7 +147,6 @@ export default function PlayerWrapper() {
             onTimeUpdate={onTimeUpdate}
             onDurationChange={onDurationChange}
             onWaiting={onWaiting}
-            onReady={onReady}
             onPlay={onPlay}
           />
 
@@ -225,15 +181,4 @@ export default function PlayerWrapper() {
       )}
     </div>
   );
-}
-
-function savePlayerState({ identifier, currentIndex, tracks, currentTime }) {
-  localStorage.setItem(
-    "playerState",
-    JSON.stringify({ identifier, currentIndex, tracks, currentTime })
-  );
-}
-
-function loadPlayerState() {
-  return JSON.parse(localStorage.getItem("playerState") || "null");
 }
