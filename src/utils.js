@@ -51,3 +51,15 @@ export const savePlayerState = ({
 export const loadPlayerState = () => {
   return JSON.parse(localStorage.getItem("playerState") || "null");
 };
+export const formatDuration = (sec) => {
+  if (!sec || sec < 0) return "00:00";
+
+  const totalSec = Math.floor(sec); // làm tròn xuống giây
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (totalSec % 60).toString().padStart(2, "0");
+
+  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+};

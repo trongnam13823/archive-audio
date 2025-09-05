@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import {
   RotateCw,
   SkipBack,
@@ -7,8 +7,14 @@ import {
   SkipForward,
   Shuffle,
 } from "lucide-react";
+import { formatDuration } from "./utils";
 
 const PlayerControls = ({
+  duration,
+  seeking,
+  setSeeking,
+  currentTime,
+  setCurrentTime,
   tracks,
   currentIndex,
   paused,
@@ -21,6 +27,21 @@ const PlayerControls = ({
 }) => {
   const track = tracks[currentIndex];
 
+  const progress = duration ? (currentTime / duration) * 100 : 0;
+  const [value, setValue] = useState(null);
+
+  const handleChange = (e) => {
+    if (!seeking) setSeeking(true);
+    setValue(e.target.value);
+  };
+
+  const handleSeekEnd = (e) => {
+    const newTime = (e.target.value / 100) * duration;
+    setSeeking(false);
+    setCurrentTime(newTime);
+    setValue(null);
+  };
+
   return (
     <div className="w-full p-4 text-center space-y-4 border-t border-white/20">
       {/* Track info */}
@@ -29,6 +50,24 @@ const PlayerControls = ({
         <p>
           {currentIndex + 1}/{tracks.length}
         </p>
+      </div>
+
+      <div className="flex items-center justify-between gap-2">
+        <span>
+          {formatDuration(value ? (value / 100) * duration : currentTime)}
+        </span>
+        <input
+          type="range"
+          className="w-full transition-all"
+          value={seeking ? Number(value) : progress}
+          min={0}
+          max={100}
+          step={0.01}
+          onChange={handleChange}
+          onMouseUp={handleSeekEnd}
+          onTouchEnd={handleSeekEnd}
+        />
+        <span>{formatDuration(duration)}</span>
       </div>
 
       {/* Player controls */}

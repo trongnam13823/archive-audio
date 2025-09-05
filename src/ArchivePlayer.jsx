@@ -31,7 +31,8 @@ export default function ArchivePlayer() {
   const audioRef = useRef(new Audio());
   const noSleepRef = useRef(new NoSleep());
   const activeItemRef = useRef(null);
-
+  const [duration, setDuration] = useState(0);
+  const [seeking, setSeeking] = useState(false);
   const [init, setInit] = useState(false);
 
   // Load trạng thái player từ localStorage
@@ -131,16 +132,18 @@ export default function ArchivePlayer() {
     };
     const onPause = () => setPaused(true);
     const onLoadstart = () => {
+      setDuration(0);
       setAudioLoading(true);
       setPaused(true);
     };
     const onLoadedmetadata = () => {
       setAudioLoading(false);
+      setDuration(audio.duration);
       audio.play();
     };
     const onEnded = onNext;
     const onTimeupdate = () => {
-      setCurrentTime(audio.currentTime);
+      if (!seeking) setCurrentTime(audio.currentTime);
     };
 
     audio.addEventListener("play", onPlay);
@@ -158,7 +161,7 @@ export default function ArchivePlayer() {
       audio.removeEventListener("ended", onEnded);
       audio.removeEventListener("timeupdate", onTimeupdate);
     };
-  }, [init, currentIndex, tracks]);
+  }, [init, currentIndex, tracks, seeking]);
 
   // Media Session
   useEffect(() => {
@@ -227,6 +230,12 @@ export default function ArchivePlayer() {
   };
   // ==========================================
 
+  useEffect(() => {
+    if (!seeking) {
+      audioRef.current.currentTime = currentTime;
+    }
+  }, [seeking]);
+
   return (
     <div className="w-svw h-svh flex flex-col justify-center items-center">
       {tracksLoading || !init ? (
@@ -276,6 +285,11 @@ export default function ArchivePlayer() {
           />
 
           <PlayerControls
+            duration={duration}
+            currentTime={currentTime}
+            seeking={seeking}
+            setSeeking={setSeeking}
+            setCurrentTime={setCurrentTime}
             currentIndex={currentIndex}
             tracks={tracks}
             paused={paused}
