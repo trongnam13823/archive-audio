@@ -59,10 +59,12 @@ export default function PlayerWrapper() {
 
   // Gọi lại API
   const onReload = useCallback(async () => {
+    setIsPlaying(false);
     await fetchTracks();
     setCurrentTime(0);
     setCurrentIndex(0);
     setIsPlaying(true);
+    playerRef.current.currentTime = 0;
   }, [fetchTracks]);
 
   // Xáo trộn tracks
@@ -146,25 +148,25 @@ export default function PlayerWrapper() {
 
   return (
     <div className="w-svw h-svh flex flex-col justify-center items-center">
+      <ReactPlayer
+        ref={playerRef}
+        src={tracks[currentIndex]?.url}
+        playing={isPlaying}
+        onEnded={onEnded}
+        onTimeUpdate={onTimeUpdate}
+        onDurationChange={onDurationChange}
+        onWaiting={onWaiting}
+        onPlay={onPlay}
+        onPause={onPause}
+        onProgress={onProgress}
+      />
+
       {isTracksLoading ? (
         "Đang tải..."
       ) : tracks.length < 1 ? (
         "Danh sách trống"
       ) : (
         <>
-          <ReactPlayer
-            ref={playerRef}
-            src={tracks[currentIndex].url}
-            playing={isPlaying}
-            onEnded={onEnded}
-            onTimeUpdate={onTimeUpdate}
-            onDurationChange={onDurationChange}
-            onWaiting={onWaiting}
-            onPlay={onPlay}
-            onPause={onPause}
-            onProgress={onProgress}
-          />
-
           {/* Hẹn giờ */}
           <Timer setIsPlaying={setIsPlaying} />
 
