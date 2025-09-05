@@ -44,6 +44,20 @@ export default (identifier) => {
     fetchTracks();
   }, []);
 
+  useEffect(() => {
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: tracks[currentIndex]?.title || "Unknown Title",
+      artist: "Sự Thật Man",
+      artwork: [
+        {
+          src: "/tacgiasuthatman.jpg",
+          sizes: "512x512",
+          type: "image/png",
+        },
+      ],
+    });
+  }, [currentIndex, tracks]);
+
   return {
     identifier,
     tracks,
