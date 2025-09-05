@@ -60,7 +60,9 @@ export default function PlayerWrapper() {
   // Gọi lại API
   const onReload = useCallback(async () => {
     await fetchTracks();
+    setCurrentTime(0);
     setCurrentIndex(0);
+    setIsPlaying(true);
   }, [fetchTracks]);
 
   // Xáo trộn tracks
