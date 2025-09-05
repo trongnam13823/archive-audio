@@ -1,78 +1,57 @@
-import { memo, useState } from "react";
 import {
-  RotateCw,
-  SkipBack,
-  Play,
   Pause,
-  SkipForward,
+  Play,
+  RotateCw,
   Shuffle,
+  SkipBack,
+  SkipForward,
 } from "lucide-react";
-import { formatDuration } from "./utils";
+import { memo } from "react";
 
-const PlayerControls = ({
-  duration,
-  seeking,
-  setSeeking,
-  currentTime,
-  setCurrentTime,
-  tracks,
+export default memo(function Controls({
   currentIndex,
-  paused,
-  audioLoading,
+  tracks,
+  isPlaying,
   onReload,
   onPrev,
-  onTogglePlay,
   onNext,
+  onTogglePlay,
   onShuffle,
-}) => {
-  const track = tracks[currentIndex];
-
-  const progress = duration ? (currentTime / duration) * 100 : 0;
-  const [value, setValue] = useState(null);
-
-  const handleChange = (e) => {
-    if (!seeking) setSeeking(true);
-    setValue(e.target.value);
-  };
-
-  const handleSeekEnd = (e) => {
-    const newTime = (e.target.value / 100) * duration;
-    setSeeking(false);
-    setCurrentTime(newTime);
-    setValue(null);
-  };
-
+  currentTime,
+  duration,
+  onSeekChange,
+  onSeekUp,
+}) {
   return (
     <div className="w-full p-4 text-center space-y-4 border-t border-white/20">
       {/* Track info */}
       <div>
-        <h1 className="font-bold text-xl line-clamp-1">{track.title}</h1>
+        <h1 className="font-bold text-xl line-clamp-1">
+          {tracks[currentIndex].title}
+        </h1>
         <p>
           {currentIndex + 1}/{tracks.length}
         </p>
       </div>
 
+      {/* Seek bar */}
       <div className="flex items-center justify-between gap-2">
-        <span>
-          {formatDuration(
-            value && duration ? (value / 100) * duration : currentTime
-          )}
-        </span>
+        <span>{formatDuration(currentTime)}</span>
         <input
           type="range"
           className="w-full transition-all"
-          value={seeking ? Number(value) : progress}
           min={0}
-          max={100}
+          max={isNaN(duration) ? 0 : duration}
           step={0.01}
-          onChange={handleChange}
-          onMouseUp={handleSeekEnd}
-          onTouchEnd={handleSeekEnd}
+          value={isNaN(currentTime) ? 0 : currentTime}
+          onChange={onSeekChange}
+          onMouseUp={onSeekUp}
+          onTouchEnd={onSeekUp}
         />
         <span>{formatDuration(duration)}</span>
       </div>
 
-      {/* Player controls */}
+      {/* controls */}
       <div className="flex gap-4 items-center justify-between">
         <button
           className="cursor-pointer size-14 flex justify-center items-center hover:bg-gray-200/20 rounded-full"
@@ -91,12 +70,11 @@ const PlayerControls = ({
         <button
           className="cursor-pointer size-14 flex justify-center items-center bg-white hover:scale-105 rounded-full disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onTogglePlay}
-          disabled={audioLoading}
         >
-          {paused ? (
-            <Play size={24} color="#000" />
-          ) : (
+          {isPlaying ? (
             <Pause size={24} color="#000" />
+          ) : (
+            <Play size={24} color="#000" />
           )}
         </button>
 
@@ -116,6 +94,17 @@ const PlayerControls = ({
       </div>
     </div>
   );
-};
+});
 
-export default memo(PlayerControls);
+function formatDuration(sec) {
+  if (!sec || sec < 0) return "00:00";
+
+  const totalSec = Math.floor(sec);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (totalSec % 60).toString().padStart(2, "0");
+
+  return h > 0 ? `${h}:${m}:${s}` : `${m}:${s}`;
+}

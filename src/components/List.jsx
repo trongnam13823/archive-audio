@@ -1,12 +1,17 @@
 import { memo } from "react";
 
-const TrackList = ({ tracks, currentIndex, onTrackByIndex, activeItemRef }) => {
+export default memo(function List({
+  tracks,
+  currentIndex,
+  activeTrackRef,
+  onSelect,
+}) {
   return (
     <ul className="w-full flex-1 overflow-y-auto">
       {tracks.map((t, i) => (
         <li
-          onClick={() => onTrackByIndex(i)}
-          ref={i === currentIndex ? activeItemRef : null}
+          onClick={() => onSelect(i)}
+          ref={i === currentIndex ? activeTrackRef : null}
           key={t.id}
           className={`px-4 py-2 cursor-pointer ${
             i === currentIndex ? "bg-white/20 font-bold" : "hover:bg-white/20"
@@ -17,6 +22,4 @@ const TrackList = ({ tracks, currentIndex, onTrackByIndex, activeItemRef }) => {
       ))}
     </ul>
   );
-};
-
-export default memo(TrackList);
+});
