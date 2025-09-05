@@ -5,7 +5,7 @@ html {
 }
 
 body {
-  font-family: system-ui;
+  @apply font-mono;
   background-color: #000;
   color: #fff;
 }

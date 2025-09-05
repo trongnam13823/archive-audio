@@ -234,11 +234,11 @@ export default function ArchivePlayer() {
       ) : tracks.length > 0 ? (
         <>
           {/* Timer */}
-          <div className="p-4 border-b border-gray-800 text-center text-gray-300 flex items-center justify-center gap-2">
-            <span>Hẹn giờ: </span>
+          <div className="w-full p-4 border-b border-white/20 text-gray-300 flex justify-center gap-2">
+            <span className="self-center">Hẹn giờ: </span>
             {remaining > 0 ? (
               <>
-                <span className=" text-white tracking-widest">
+                <span className=" text-white font-mono self-center">
                   {formatRemaining(remaining)}
                 </span>
 
