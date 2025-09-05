@@ -34,7 +34,7 @@ export default function ArchivePlayer() {
 
   const [paused, setPaused] = useState(true);
   const [audioLoading, setAudioLoading] = useState(true);
-  const audioRef = useRef(null);
+  const audioRef = useRef(new Audio());
   const activeItemRef = useRef(null);
   const noSleepRef = useRef(new NoSleep());
 
@@ -56,34 +56,22 @@ export default function ArchivePlayer() {
   }, []);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (!audioRef.current) return;
-      savePlayerState({
-        identifier,
-        tracks,
-        currentIndex,
-        currentTime: audioRef.current.currentTime,
-      });
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [identifier, tracks, currentIndex]);
+    savePlayerState({
+      identifier,
+      tracks,
+      currentIndex,
+      currentTime,
+    });
+  }, [identifier, tracks, currentIndex, currentTime]);
 
   useEffect(() => {
-    if (!init || !audioRef.current) return;
-
     audioRef.current.currentTime = currentTime;
   }, [init]);
 
   useEffect(() => {
-    if (tracks.length < 1 || !audioRef.current) return;
-
-    audioRef.current.src = tracks[currentIndex].url;
-    audioRef.current.play().catch(() => {});
+    if (tracks.length) {
+      audioRef.current.src = tracks[currentIndex].url;
+    }
   }, [currentIndex, tracks]);
 
   useEffect(() => {
@@ -98,7 +86,7 @@ export default function ArchivePlayer() {
 
   const onTogglePlay = () => {
     if (audioRef?.current.paused) {
-      audioRef.current.play().catch(() => {});
+      audioRef.current.play();
     } else {
       audioRef.current.pause();
     }
@@ -142,6 +130,7 @@ export default function ArchivePlayer() {
 
     const onLoadedmetadata = () => {
       setAudioLoading(false);
+      audioRef.current.play();
     };
 
     const onTimeupdate = () => {
@@ -160,10 +149,11 @@ export default function ArchivePlayer() {
       audioRef.current.removeEventListener("pause", onPause);
       audioRef.current.removeEventListener("loadstart", onLoadstart);
       audioRef.current.removeEventListener("loadedmetadata", onLoadedmetadata);
+
       audioRef.current.removeEventListener("ended", onNext);
       audioRef.current.removeEventListener("timeupdate", onTimeupdate);
     };
-  }, [audioRef, currentIndex, tracks]);
+  }, [init, audioRef, currentIndex, tracks]);
 
   useEffect(() => {
     if (!("mediaSession" in navigator)) return;
@@ -207,8 +197,6 @@ export default function ArchivePlayer() {
                 {currentIndex + 1}/{tracks.length}
               </p>
             </div>
-
-            <audio ref={audioRef} controls className="w-full"></audio>
 
             <div className="flex gap-4 items-center justify-between">
               <button
