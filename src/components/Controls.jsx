@@ -21,6 +21,7 @@ export default memo(function Controls({
   duration,
   onSeekChange,
   onSeekUp,
+  isAudioLoading,
 }) {
   return (
     <div className="w-full p-4 text-center space-y-4 border-t border-white/20">
@@ -70,6 +71,7 @@ export default memo(function Controls({
         <button
           className="cursor-pointer size-14 flex justify-center items-center bg-white hover:scale-105 rounded-full disabled:cursor-not-allowed disabled:opacity-50"
           onClick={onTogglePlay}
+          disabled={isAudioLoading}
         >
           {isPlaying ? (
             <Pause size={24} color="#000" />

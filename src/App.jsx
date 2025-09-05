@@ -20,6 +20,7 @@ export default function PlayerWrapper() {
   const playerRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSeeking, setSeeking] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(true);
   const [currentTime, setCurrentTime] = useState(0);
 
   const activeTrackRef = useRef(null);
@@ -86,7 +87,10 @@ export default function PlayerWrapper() {
   // Cập nhật thời gian hiện tại
   const onTimeUpdate = useCallback(
     (e) => {
-      if (!isSeeking) setCurrentTime(e.target.currentTime);
+      if (!isSeeking) {
+        setIsAudioLoading(false);
+        setCurrentTime(e.target.currentTime);
+      }
     },
     [setCurrentTime, isSeeking]
   );
@@ -103,7 +107,6 @@ export default function PlayerWrapper() {
   const onSeekChange = useCallback(
     (e) => {
       if (!isSeeking) setSeeking(true);
-
       setCurrentTime(e.target.value);
     },
     [isSeeking, setSeeking, setCurrentTime]
@@ -120,14 +123,24 @@ export default function PlayerWrapper() {
 
   const onWaiting = useCallback(
     (e) => {
+      setIsAudioLoading(true);
       setDuration(e.target.duration);
     },
     [setDuration]
   );
 
+  const onProgress = useCallback(() => {
+    setIsAudioLoading(false);
+  }, [setIsAudioLoading]);
+
   const onPlay = useCallback(() => {
+    setIsPlaying(true);
     noSleepRef.current.enable();
-  }, [noSleepRef]);
+  }, [noSleepRef, setIsPlaying]);
+
+  const onPause = useCallback(() => {
+    setIsPlaying(false);
+  }, [setIsPlaying]);
 
   return (
     <div className="w-svw h-svh flex flex-col justify-center items-center">
@@ -146,6 +159,8 @@ export default function PlayerWrapper() {
             onDurationChange={onDurationChange}
             onWaiting={onWaiting}
             onPlay={onPlay}
+            onPause={onPause}
+            onProgress={onProgress}
           />
 
           {/* Hẹn giờ */}
@@ -161,6 +176,7 @@ export default function PlayerWrapper() {
 
           {/* Điều Khiển */}
           <Controls
+            isAudioLoading={isAudioLoading}
             playerRef={playerRef}
             tracks={tracks}
             currentIndex={currentIndex}
